@@ -11,7 +11,7 @@ func main() {
 	database.DatabaseConnector()
 
 	//auto-migrate user table
-	database.DB.AutoMigrate(&auth_handlers.User{})
+	database.DB.AutoMigrate(&auth_handlers.User{}, &auth_handlers.Token{})
 
 	//router
 	router := gin.Default()
