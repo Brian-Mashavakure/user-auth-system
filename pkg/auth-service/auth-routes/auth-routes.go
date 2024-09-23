@@ -11,6 +11,7 @@ func AuthRoutes(router *gin.Engine) {
 
 	api.POST("/register", auth_handlers.RegisterUser)
 	api.POST("/login", auth_middleware.TokenCheckMiddleware(), auth_handlers.LoginUser)
-	api.POST("/tokenstatus", auth_handlers.TokenStatus)
+	api.POST("/deleteuser", auth_middleware.TokenCheckMiddleware(), auth_handlers.DeleteUser)
+	api.POST("/tokenstatus", auth_middleware.TokenCheckMiddleware(), auth_handlers.TokenStatus)
 
 }

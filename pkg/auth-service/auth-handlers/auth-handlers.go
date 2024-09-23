@@ -32,6 +32,7 @@ type Token struct {
 	EXPIRY_DATE string
 }
 
+// TODO: Update function on registring a user that had been deleted
 func RegisterUser(c *gin.Context) {
 	name := c.Request.FormValue("name")
 	email := c.Request.FormValue("email")
@@ -47,7 +48,7 @@ func RegisterUser(c *gin.Context) {
 	//check for existing users
 	var existingUser User
 
-	oldEmail := database.DB.Where("email = ? ", email).First(&existingUser)
+	oldEmail := database.DB.Where("email = ? AND user_status = ?", email, "active").First(&existingUser)
 	if oldEmail.Error == nil {
 		log.Println("Error occurred trying to create user")
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "User with that email address already exists"})
@@ -55,9 +56,9 @@ func RegisterUser(c *gin.Context) {
 
 	}
 
-	oldUser := database.DB.Where("username = ? ", username).First(&existingUser)
+	oldUser := database.DB.Where("username = ? AND user_status = ?", username, "active").First(&existingUser)
 	if oldUser.Error == nil {
-		log.Println("Error occured trying to create user")
+		log.Println("Error occurred trying to create user")
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "User with that username already exists"})
 		return
 
@@ -75,7 +76,7 @@ func RegisterUser(c *gin.Context) {
 
 	result := database.DB.Create(&user)
 	if result.Error != nil {
-		log.Println("Error occurred trying to create user")
+		log.Printf("Error occurred trying to create user\n: %n", result.Error)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "Failed to create user"})
 		return
 	}
@@ -136,6 +137,7 @@ func LoginUser(c *gin.Context) {
 	if user.USER_STATUS == "inactive" {
 		log.Println("User was deleted")
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "User was deleted"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Logged in successfully"})
@@ -184,4 +186,18 @@ func TokenStatus(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"message": "Token provided not in our database"})
 	}
 
+}
+
+func DeleteUser(c *gin.Context) {
+	username := c.Request.FormValue("username")
+
+	//delete user
+	result := database.DB.Table("users").Where("username = ?", username).Update("user_status", "inactive")
+	if result.Error != nil {
+		log.Println("Error deleting user")
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "Failed to delete user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }

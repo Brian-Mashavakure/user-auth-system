@@ -37,7 +37,7 @@ func TokenCheckMiddleware() gin.HandlerFunc {
 		}
 
 		//check if token is still valid
-		todayDate := time.Now().Format("02/01/2006")
+		todayDate := time.Now().Format("02-01-2006")
 		status := utils.CompareDates(todayDate, token.EXPIRY_DATE)
 		if status == false {
 			log.Println("Token has expired")

@@ -62,16 +62,16 @@ func HashString(input string) string {
 
 // compare two date strings
 func CompareDates(todayDate, expiryDate string) bool {
-	//parse dates
-	parseToday, err1 := time.Parse("02/01/2006", todayDate)
+	//parse dates with the correct format (DD-MM-YYYY)
+	parseToday, err1 := time.Parse("02-01-2006", todayDate)
 	if err1 != nil {
-		log.Println("Failed to parse date")
+		log.Println("Failed to parse today's date")
 		panic(err1)
 	}
 
-	parseExpiry, err2 := time.Parse("02/01/2006", expiryDate)
+	parseExpiry, err2 := time.Parse("02-01-2006", expiryDate)
 	if err2 != nil {
-		log.Println("Failed to parse date")
+		log.Println("Failed to parse expiry date")
 		panic(err2)
 	}
 
