@@ -61,7 +61,14 @@ func RegisterUser(c *gin.Context) {
 		log.Println("Error occurred trying to create user")
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "User with that username already exists"})
 		return
+	}
 
+	deletedUser := database.DB.Where("username = ? AND user_status = ?", username, "inactive").First(&existingUser)
+	if deletedUser.Error == nil {
+		log.Printf("Error occurred trying to create user")
+		utils.UpdateUserStatus(username, "active")
+		c.JSON(http.StatusOK, gin.H{"message": "User successfully recreated"})
+		return
 	}
 
 	user := User{

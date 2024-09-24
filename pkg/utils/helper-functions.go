@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/Brian-Mashavakure/user-auth-system/pkg/database"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -90,4 +91,12 @@ func GenerateToken(username, email string) (string, string, string) {
 	stringToHash := username + email + fmtStartDate + fmtExpiryDate
 	token := HashString(stringToHash)
 	return token, fmtStartDate, fmtExpiryDate
+}
+
+func UpdateUserStatus(username, status string) {
+	result := database.DB.Table("users").Where("username = ?", username).Update("user_status", status)
+	if result.Error != nil {
+		log.Printf("Error updating user: %n", result.Error)
+		return
+	}
 }
