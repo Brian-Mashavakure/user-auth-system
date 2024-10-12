@@ -50,7 +50,7 @@ func RegisterUser(c *gin.Context) {
 
 	oldEmail := database.DB.Where("email = ? AND user_status = ?", email, "active").First(&existingUser)
 	if oldEmail.Error == nil {
-		log.Println("Error occurred trying to create user")
+		log.Printf("Error occurred trying to create user:\n %n", oldEmail.Error)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "User with that email address already exists"})
 		return
 
@@ -58,14 +58,14 @@ func RegisterUser(c *gin.Context) {
 
 	oldUser := database.DB.Where("username = ? AND user_status = ?", username, "active").First(&existingUser)
 	if oldUser.Error == nil {
-		log.Println("Error occurred trying to create user")
+		log.Printf("Error occurred trying to create user:\n %n", oldUser.Error)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "User with that username already exists"})
 		return
 	}
 
 	deletedUser := database.DB.Where("username = ? AND user_status = ?", username, "inactive").First(&existingUser)
 	if deletedUser.Error == nil {
-		log.Printf("Error occurred trying to create user")
+		log.Printf("Error occurred trying to create user:\n %n", deletedUser.Error)
 		utils.UpdateUserStatus(username, "active")
 		c.JSON(http.StatusOK, gin.H{"message": "User successfully recreated"})
 		return
@@ -116,7 +116,7 @@ func RegisterUser(c *gin.Context) {
 	}
 
 	c.Header("Content-Type", "application/json")
-	c.String(http.StatusOK, string(tokenJson))
+	c.JSON(http.StatusOK, gin.H{"message": tokenJson})
 }
 
 func LoginUser(c *gin.Context) {
