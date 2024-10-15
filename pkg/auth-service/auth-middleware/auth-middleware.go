@@ -1,6 +1,7 @@
 package auth_middleware
 
 import (
+	"fmt"
 	auth_handlers "github.com/Brian-Mashavakure/user-auth-system/pkg/auth-service/auth-handlers"
 	"github.com/Brian-Mashavakure/user-auth-system/pkg/database"
 	"github.com/Brian-Mashavakure/user-auth-system/pkg/utils"
@@ -14,6 +15,12 @@ func TokenCheckMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.Request.Header.Get("Token")
 		username := c.Request.FormValue("username")
+
+		formattedToken := string(tokenString)
+
+		fmt.Printf("Header token is as follows: %s\n", tokenString)
+
+		fmt.Printf("Formatted token is as follows: %s\n", formattedToken)
 
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Request not authorized"})
@@ -29,6 +36,8 @@ func TokenCheckMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
+		fmt.Printf("Database token is as follows: %s\n", token.TOKEN)
 
 		//check if token string is the same
 		if tokenString != token.TOKEN {

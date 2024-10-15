@@ -127,14 +127,19 @@ func LoginUser(c *gin.Context) {
 	username := c.Request.FormValue("username")
 	password := c.Request.FormValue("password")
 
+	fmt.Printf("Header password is as follows: %s\n", password)
+
 	//retrieve user
-	user := User{USERNAME: username}
-	result := database.DB.Table("tokens").Where("username = ?", username).Scan(&user)
+	var user User
+	//user := User{USERNAME: username}
+	result := database.DB.Table("users").Where("username = ?", username).Scan(&user)
 	if result.Error != nil {
 		log.Println("Error retrieving users from db")
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "Incorrect email"})
 		return
 	}
+
+	fmt.Printf("DB password is as follows:%s\n", user.PASSWORD)
 
 	//compare passwords
 	comparison := utils.ComparePasswordAndHash(user.PASSWORD, password)
@@ -151,7 +156,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Logged in successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": string("Logged in successfully")})
 }
 
 func TokenStatus(c *gin.Context) {
