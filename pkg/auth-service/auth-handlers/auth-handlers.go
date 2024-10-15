@@ -1,6 +1,7 @@
 package auth_handlers
 
 import (
+	"fmt"
 	"github.com/Brian-Mashavakure/user-auth-system/pkg/database"
 	"github.com/Brian-Mashavakure/user-auth-system/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -32,7 +33,6 @@ type Token struct {
 	EXPIRY_DATE string
 }
 
-// TODO: Update function on registring a user that had been deleted
 func RegisterUser(c *gin.Context) {
 	name := c.Request.FormValue("name")
 	email := c.Request.FormValue("email")
@@ -83,13 +83,15 @@ func RegisterUser(c *gin.Context) {
 
 	result := database.DB.Create(&user)
 	if result.Error != nil {
-		log.Printf("Error occurred trying to create user\n: %n", result.Error)
+		//log.Printf("Error occurred trying to create user\n: %s", result.Error)
+		fmt.Printf("Error occurred trying to create user: %s", result.Error)
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "Failed to create user"})
 		return
 	}
 
 	//generate token
 	tokenString, tokenStartDate, tokenExpiryDate := utils.GenerateToken(username, email)
+	fmt.Printf("This is what your token looks like: %s", tokenString)
 
 	//save token to db
 	token := Token{
@@ -101,7 +103,7 @@ func RegisterUser(c *gin.Context) {
 
 	tokenResult := database.DB.Create(&token)
 	if tokenResult.Error != nil {
-		log.Println("Error occcurred trying to save token")
+		log.Println("Error occurred trying to save token")
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "Error occurred trying to save token"})
 		return
 	}
@@ -115,8 +117,10 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	fmt.Printf("This is what your json token looks like: %s", tokenJson)
+
 	c.Header("Content-Type", "application/json")
-	c.JSON(http.StatusOK, gin.H{"message": tokenJson})
+	c.JSON(http.StatusOK, gin.H{"message": string(tokenJson)})
 }
 
 func LoginUser(c *gin.Context) {
@@ -125,7 +129,7 @@ func LoginUser(c *gin.Context) {
 
 	//retrieve user
 	user := User{USERNAME: username}
-	result := database.DB.First(&user).Scan(&user)
+	result := database.DB.Table("tokens").Where("username = ?", username).Scan(&user)
 	if result.Error != nil {
 		log.Println("Error retrieving users from db")
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "Incorrect email"})
@@ -157,7 +161,7 @@ func TokenStatus(c *gin.Context) {
 
 	token := Token{USERNAME: username}
 
-	result := database.DB.Table("tokens").First(&token).Scan(&token)
+	result := database.DB.Table("tokens").Where("username = ?", username).Scan(&token)
 	if result.Error != nil {
 		log.Println("Error retrieving user from db")
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{"error": "Failed to find username"})

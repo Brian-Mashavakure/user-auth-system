@@ -13,5 +13,4 @@ func AuthRoutes(router *gin.Engine) {
 	api.POST("/login", auth_middleware.TokenCheckMiddleware(), auth_handlers.LoginUser)
 	api.POST("/deleteuser", auth_middleware.TokenCheckMiddleware(), auth_handlers.DeleteUser)
 	api.POST("/tokenstatus", auth_middleware.TokenCheckMiddleware(), auth_handlers.TokenStatus)
-
 }

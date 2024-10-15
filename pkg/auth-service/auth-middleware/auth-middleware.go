@@ -12,8 +12,9 @@ import (
 
 func TokenCheckMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.Request.Header.Get("Authorization")
+		tokenString := c.Request.Header.Get("Token")
 		username := c.Request.FormValue("username")
+
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Request not authorized"})
 			c.Abort()
@@ -22,7 +23,7 @@ func TokenCheckMiddleware() gin.HandlerFunc {
 
 		//retrieve user token info
 		token := auth_handlers.Token{USERNAME: username}
-		result := database.DB.Table("tokens").First(&token).Scan(&token)
+		result := database.DB.Table("tokens").Where("username = ?", username).Scan(&token)
 		if result.Error != nil {
 			log.Println("Error finding user or token in db")
 			c.Abort()
