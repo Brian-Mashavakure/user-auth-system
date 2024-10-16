@@ -13,7 +13,7 @@ import (
 
 func TokenCheckMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.Request.Header.Get("Token")
+		tokenString := c.Request.Header.Get("Authorization")
 		username := c.Request.FormValue("username")
 
 		formattedToken := string(tokenString)
@@ -42,7 +42,7 @@ func TokenCheckMiddleware() gin.HandlerFunc {
 		//check if token string is the same
 		if tokenString != token.TOKEN {
 			log.Println("Invalid token string")
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token string provided"})
+			c.JSON(http.StatusOK, gin.H{"error": "Invalid token string provided"})
 			return
 		}
 
@@ -51,7 +51,7 @@ func TokenCheckMiddleware() gin.HandlerFunc {
 		status := utils.CompareDates(todayDate, token.EXPIRY_DATE)
 		if status == false {
 			log.Println("Token has expired")
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Expired token string provided"})
+			c.JSON(http.StatusOK, gin.H{"error": "Expired token string provided"})
 			return
 		}
 

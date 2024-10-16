@@ -18,6 +18,6 @@ func main() {
 
 	auth_routes.AuthRoutes(router)
 
-	router.Run("192.168.0.7:8080")
+	router.Run("192.168.1.169:8080")
 
 }
