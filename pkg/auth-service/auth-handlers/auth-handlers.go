@@ -195,7 +195,7 @@ func TokenStatus(c *gin.Context) {
 				return
 			}
 
-			c.String(http.StatusOK, newTokenString)
+			c.JSON(http.StatusOK, gin.H{"Message": string(newTokenString)})
 		}
 
 	} else {
